@@ -717,7 +717,6 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not update.message:
             return
 
-        # Get full text after command manually
         full_text = update.message.text
 
         if not full_text or len(full_text.split(" ", 1)) < 2:
@@ -737,7 +736,18 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"{encoded_prompt}?width=512&height=512&seed={random.randint(1,999999)}"
         )
 
-        await update.message.reply_photo(photo=image_url)
+        # Download image first
+        response = requests.get(image_url, timeout=30)
+
+        if response.status_code != 200:
+            await update.message.reply_text("❌ Image server error.")
+            return
+
+        from io import BytesIO
+        image_bytes = BytesIO(response.content)
+        image_bytes.name = "suolala.png"
+
+        await update.message.reply_photo(photo=image_bytes)
 
     except Exception as e:
         print("Generate ERROR:", e)
