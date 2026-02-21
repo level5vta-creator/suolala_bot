@@ -37,14 +37,12 @@ small soft smile,
 long straight dark navy blue hair fading to teal at ends,
 center hair part,
 no bangs covering eyes,
-
 wearing a purple to teal gradient ZIP hoodie (front zipper visible),
 small white letter "S" logo on the LEFT chest only (not center),
 no hoodie strings,
 simple hoodie pocket,
 wearing matching gradient track pants (not shorts),
 wearing simple teal sneakers,
-
 minimal texture,
 smooth plastic material look,
 Pixar-style studio lighting,
@@ -727,9 +725,17 @@ async def generate(update, context):
 
     encoded_prompt = urllib.parse.quote(final_prompt)
 
-    image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}"
+    image_url = (
+        f"https://image.pollinations.ai/prompt/"
+        f"{encoded_prompt}?width=512&height=512"
+    )
 
     await update.message.reply_photo(photo=image_url)
+
+
+async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await track_messages(update, context)
+    await automatic_messages(update, context)
 
 # ===== AUTOMATIC MESSAGES =====
 async def automatic_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -836,46 +842,45 @@ async def automatic_messages(update: Update, context: ContextTypes.DEFAULT_TYPE)
                 print(f"Automatic message error: {e}")
             break  # Only respond to one keyword per message
 
-# ===== START BOT =====
-app = ApplicationBuilder().token(TOKEN).post_init(post_init).build()
+def main():
+    application = ApplicationBuilder().token(TOKEN).post_init(post_init).build()
 
-# MESSAGE TRACKER MUST BE FIRST
-app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, track_messages))
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("generate", generate))
 
-# AUTOMATIC MESSAGES HANDLER
-app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, automatic_messages))
+    application.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text)
+    )
 
-# WELCOME - THIS MUST COME AFTER AUTOMATIC MESSAGES TO AVOID CONFLICT
-app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome_new_member))
+    application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome_new_member))
 
-# TRANSLATER
-app.add_handler(CommandHandler("translate", translate_cmd))
+    application.add_handler(CommandHandler("translate", translate_cmd))
+    application.add_handler(CommandHandler("price", price))
+    application.add_handler(CommandHandler("chart", chart))
+    application.add_handler(CommandHandler("buy", buy))
+    application.add_handler(CommandHandler("memes", memes))
+    application.add_handler(CommandHandler("stickers", stickers))
+    application.add_handler(CommandHandler("x", x))
+    application.add_handler(CommandHandler("community", community))
+    application.add_handler(CommandHandler("nft", nft))
+    application.add_handler(CommandHandler("contract", contract))
+    application.add_handler(CommandHandler("website", website))
+    application.add_handler(CommandHandler("rules", rules))
+    application.add_handler(CommandHandler("suolala", suolala))
+    application.add_handler(CommandHandler("motivate", motivate))
+    application.add_handler(CommandHandler("count", count_cmd))
+    application.add_handler(CommandHandler("top", top_cmd))
+    application.add_handler(CommandHandler("randomnft", randomnft))
+    application.add_handler(CommandHandler("pricecheck", pricecheck))
 
-# ALL COMMANDS REGISTERED
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("price", price))
-app.add_handler(CommandHandler("chart", chart))
-app.add_handler(CommandHandler("buy", buy))
-app.add_handler(CommandHandler("memes", memes))
-app.add_handler(CommandHandler("stickers", stickers))
-app.add_handler(CommandHandler("x", x))
-app.add_handler(CommandHandler("community", community))
-app.add_handler(CommandHandler("nft", nft))
-app.add_handler(CommandHandler("contract", contract))
-app.add_handler(CommandHandler("website", website))
-app.add_handler(CommandHandler("rules", rules))
-app.add_handler(CommandHandler("suolala", suolala))
-app.add_handler(CommandHandler("motivate", motivate))
-app.add_handler(CommandHandler("count", count_cmd))
-app.add_handler(CommandHandler("top", top_cmd))
-app.add_handler(CommandHandler("randomnft", randomnft))
-app.add_handler(CommandHandler("pricecheck", pricecheck))
-app.add_handler(CommandHandler("generate", generate))
+    print("✅ SUOLALA BOT RUNNING — ALL FEATURES ENABLED")
+    print(f"📊 Total commands: 20")
+    print(f"🤖 Automatic messages: Enabled for 15 keywords")
+    print(f"👋 Welcome messages: Fixed and will send properly")
+    print(f"🕒 Welcome messages: Auto-delete after 5 minutes")
+    print(f"💬 Auto-responses: Delete after 1 minute")
+    application.run_polling(drop_pending_updates=True)
 
-print("✅ SUOLALA BOT RUNNING — ALL FEATURES ENABLED")
-print(f"📊 Total commands: 20")
-print(f"🤖 Automatic messages: Enabled for 15 keywords")
-print(f"👋 Welcome messages: Fixed and will send properly")
-print(f"🕒 Welcome messages: Auto-delete after 5 minutes")
-print(f"💬 Auto-responses: Delete after 1 minute")
-app.run_polling(drop_pending_updates=True)
+
+if __name__ == "__main__":
+    main()
