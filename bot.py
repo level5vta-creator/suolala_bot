@@ -27,6 +27,8 @@ MAGICEDEN_LIST_URL = "https://api-mainnet.magiceden.dev/v2/collections/{}/listin
 TOKEN = os.getenv("BOT_TOKEN")
 REPLICATE_API_TOKEN = os.getenv("REPLICATE_API_TOKEN")
 
+BASE_PROMPT = """ Ultra clean 3D chibi crypto mascot girl, full body, toy-like smooth 3D render, short chibi proportions, round smooth face, large brown eyes, small soft smile, long straight dark navy blue hair fading to teal at ends, center hair part, no bangs covering eyes, wearing a purple to teal gradient ZIP hoodie (front zipper visible), small white letter "S" logo on the LEFT chest only (not center), no hoodie strings, simple hoodie pocket, wearing matching gradient track pants (not shorts), wearing simple teal sneakers, minimal texture, smooth plastic material look, Pixar-style studio lighting, solid black background, clean render, exact same mascot identity, same outfit design, same proportions """
+
 # ===== TIMEZONE =====
 CHINA_TZ = ZoneInfo("Asia/Shanghai")
 
@@ -692,62 +694,32 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
         text = update.message.text or ""
-
         if " " not in text:
-            await update.message.reply_text(
-                "Usage: /generate your scene description"
-            )
+            await update.message.reply_text("Usage: /generate your scene description")
             return
 
-        user_action = text.split(" ", 1)[1].strip()
-
-        if not user_action:
-            await update.message.reply_text(
-                "Usage: /generate your scene description"
-            )
+        user_scene = text.split(" ", 1)[1].strip()
+        if not user_scene:
+            await update.message.reply_text("Usage: /generate your scene description")
             return
 
-        if not REPLICATE_API_TOKEN:
+        token = os.getenv("REPLICATE_API_TOKEN")
+        if not token:
             await update.message.reply_text("❌ Missing REPLICATE_API_TOKEN")
             return
 
         await update.message.reply_text("🎨 Generating Suolala image...")
 
-        final_prompt = f"""
-Ultra clean 3D chibi crypto mascot girl,
-full body,
-toy-like smooth 3D render,
-short chibi proportions,
-round smooth face,
-large brown eyes,
-small soft smile,
-long straight dark navy blue hair fading to teal at ends,
-center hair part,
-no bangs covering eyes,
-wearing a purple to teal gradient ZIP hoodie (front zipper visible),
-small white letter "S" logo on the LEFT chest only (not center),
-no hoodie strings,
-simple hoodie pocket,
-wearing matching gradient track pants (not shorts),
-wearing simple teal sneakers,
-minimal texture,
-smooth plastic material look,
-Pixar-style studio lighting,
-solid black background,
-clean render,
-exact same mascot identity,
-same outfit design,
-same proportions,
-{user_action}
-"""
+        final_prompt = BASE_PROMPT + ", " + user_scene
 
         response = requests.post(
-            "https://api.replicate.com/v1/models/stability-ai/sdxl/predictions",
+            "https://api.replicate.com/v1/predictions",
             headers={
-                "Authorization": f"Token {REPLICATE_API_TOKEN}",
+                "Authorization": f"Token {token}",
                 "Content-Type": "application/json"
             },
             json={
+                "model": "stability-ai/sdxl",
                 "input": {
                     "prompt": final_prompt,
                     "width": 768,
@@ -758,18 +730,16 @@ same proportions,
         )
 
         if response.status_code != 201:
-            await update.message.reply_text(
-                f"❌ Replicate error: {response.text}"
-            )
+            await update.message.reply_text(f"❌ Replicate error: {response.text}")
             return
 
-        prediction = response.json()
-        get_url = prediction["urls"]["get"]
+        data = response.json()
+        get_url = data["urls"]["get"]
 
         while True:
             poll = requests.get(
                 get_url,
-                headers={"Authorization": f"Token {REPLICATE_API_TOKEN}"}
+                headers={"Authorization": f"Token {token}"}
             ).json()
 
             if poll.get("status") == "succeeded":
