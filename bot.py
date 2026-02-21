@@ -25,33 +25,7 @@ MAGICEDEN_LIST_URL = "https://api-mainnet.magiceden.dev/v2/collections/{}/listin
 
 # ===== BOT TOKEN =====
 TOKEN = os.getenv("BOT_TOKEN")
-
-BASE_PROMPT = """
-Ultra clean 3D chibi crypto mascot girl,
-full body,
-toy-like smooth 3D render,
-short chibi proportions,
-round smooth face,
-large brown eyes,
-small soft smile,
-long straight dark navy blue hair fading to teal at ends,
-center hair part,
-no bangs covering eyes,
-wearing a purple to teal gradient ZIP hoodie (front zipper visible),
-small white letter "S" logo on the LEFT chest only (not center),
-no hoodie strings,
-simple hoodie pocket,
-wearing matching gradient track pants (not shorts),
-wearing simple teal sneakers,
-minimal texture,
-smooth plastic material look,
-Pixar-style studio lighting,
-solid black background,
-clean render,
-exact same mascot identity,
-same outfit design,
-same proportions
-"""
+REPLICATE_API_TOKEN = os.getenv("REPLICATE_API_TOKEN")
 
 # ===== TIMEZONE =====
 CHINA_TZ = ZoneInfo("Asia/Shanghai")
@@ -717,58 +691,100 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not update.message:
             return
 
-        prompt_text = " ".join(context.args).strip()
-        if not prompt_text:
+        text = update.message.text or ""
+
+        if " " not in text:
             await update.message.reply_text(
                 "Usage: /generate your scene description"
             )
             return
 
-        hf_token = os.getenv("HF_API_TOKEN") or os.getenv("HUGGINGFACE_API_TOKEN")
-        if not hf_token:
-            await update.message.reply_text("❌ Missing HuggingFace API token (HF_API_TOKEN).")
+        user_action = text.split(" ", 1)[1].strip()
+
+        if not user_action:
+            await update.message.reply_text(
+                "Usage: /generate your scene description"
+            )
             return
 
-        from io import BytesIO
-        final_prompt = f"{BASE_PROMPT}, {prompt_text}"
+        if not REPLICATE_API_TOKEN:
+            await update.message.reply_text("❌ Missing REPLICATE_API_TOKEN")
+            return
+
+        await update.message.reply_text("🎨 Generating Suolala image...")
+
+        final_prompt = f"""
+Ultra clean 3D chibi crypto mascot girl,
+full body,
+toy-like smooth 3D render,
+short chibi proportions,
+round smooth face,
+large brown eyes,
+small soft smile,
+long straight dark navy blue hair fading to teal at ends,
+center hair part,
+no bangs covering eyes,
+wearing a purple to teal gradient ZIP hoodie (front zipper visible),
+small white letter "S" logo on the LEFT chest only (not center),
+no hoodie strings,
+simple hoodie pocket,
+wearing matching gradient track pants (not shorts),
+wearing simple teal sneakers,
+minimal texture,
+smooth plastic material look,
+Pixar-style studio lighting,
+solid black background,
+clean render,
+exact same mascot identity,
+same outfit design,
+same proportions,
+{user_action}
+"""
+
         payload = {
-            "inputs": final_prompt,
-            "parameters": {
+            "version": "db21e45f6d96a3d18d3c5b3d9dcb1d7c8b9c2a0fbb6f50e9f1c0e1c9c3e2f123",
+            "input": {
+                "prompt": final_prompt,
                 "width": 768,
-                "height": 768,
-                "num_inference_steps": 30,
-                "guidance_scale": 7.5,
-                "seed": random.randint(1, 999999),
-            },
-            "options": {
-                "wait_for_model": True,
-            },
+                "height": 768
+            }
         }
 
-        hf_model = "stabilityai/stable-diffusion-2-1"
-        endpoint = "https://router.huggingface.co/hf-inference/v1/models/stabilityai/stable-diffusion-2-1"
         response = requests.post(
-            endpoint,
+            "https://api.replicate.com/v1/predictions",
             headers={
-                "Authorization": f"Bearer {hf_token}",
-                "Content-Type": "application/json",
+                "Authorization": f"Token {REPLICATE_API_TOKEN}",
+                "Content-Type": "application/json"
             },
             json=payload,
-            timeout=120,
+            timeout=120
         )
 
-        if response.status_code != 200:
-            try:
-                err = response.json().get("error", "Unknown error")
-            except Exception:
-                err = response.text[:200]
-            await update.message.reply_text(f"❌ HuggingFace image error: {err}")
+        if response.status_code != 201:
+            await update.message.reply_text(
+                f"❌ Replicate error: {response.text}"
+            )
             return
 
-        image_bytes = BytesIO(response.content)
-        image_bytes.name = "suolala.png"
+        prediction = response.json()
+        get_url = prediction["urls"]["get"]
 
-        await update.message.reply_photo(photo=image_bytes)
+        while True:
+            poll = requests.get(
+                get_url,
+                headers={"Authorization": f"Token {REPLICATE_API_TOKEN}"}
+            ).json()
+
+            if poll.get("status") == "succeeded":
+                image_url = poll["output"][0]
+                await update.message.reply_photo(photo=image_url)
+                return
+
+            if poll.get("status") == "failed":
+                await update.message.reply_text("❌ Image generation failed.")
+                return
+
+            await asyncio.sleep(2)
 
     except Exception as e:
         print("Generate ERROR:", e)
