@@ -746,7 +746,7 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
 
         hf_model = "stabilityai/stable-diffusion-2-1"
-        endpoint = "https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-2-1"
+        endpoint = "https://router.huggingface.co/hf-inference/v1/models/stabilityai/stable-diffusion-2-1"
         response = requests.post(
             endpoint,
             headers={
@@ -754,7 +754,7 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "Content-Type": "application/json",
             },
             json=payload,
-            timeout=90,
+            timeout=120,
         )
 
         if response.status_code != 200:
