@@ -25,7 +25,6 @@ MAGICEDEN_LIST_URL = "https://api-mainnet.magiceden.dev/v2/collections/{}/listin
 
 # ===== BOT TOKEN =====
 TOKEN = os.getenv("BOT_TOKEN")
-DEEPAI_API_KEY = os.getenv("DEEPAI_API_KEY")
 
 BASE_PROMPT = """
 Ultra clean 3D chibi crypto mascot girl,
@@ -719,38 +718,24 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
         text = update.message.text or ""
+
         if " " not in text:
             await update.message.reply_text("Usage: /generate your scene description")
             return
 
         user_scene = text.split(" ", 1)[1].strip()
+
         if not user_scene:
             await update.message.reply_text("Usage: /generate your scene description")
-            return
-
-        if not DEEPAI_API_KEY:
-            await update.message.reply_text("❌ Missing DEEPAI_API_KEY")
             return
 
         await update.message.reply_text("🎨 Generating Suolala image...")
 
         final_prompt = BASE_PROMPT + ", " + user_scene
 
-        response = requests.post(
-            "https://api.deepai.org/api/text2img",
-            data={"text": final_prompt},
-            headers={"api-key": DEEPAI_API_KEY}
-        )
+        encoded_prompt = urllib.parse.quote(final_prompt)
 
-        if response.status_code != 200:
-            await update.message.reply_text(f"❌ DeepAI error: {response.text}")
-            return
-
-        image_url = response.json().get("output_url")
-
-        if not image_url:
-            await update.message.reply_text("❌ Image generation failed.")
-            return
+        image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}"
 
         await update.message.reply_photo(photo=image_url)
 
