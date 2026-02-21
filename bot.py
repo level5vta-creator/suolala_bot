@@ -25,9 +25,34 @@ MAGICEDEN_LIST_URL = "https://api-mainnet.magiceden.dev/v2/collections/{}/listin
 
 # ===== BOT TOKEN =====
 TOKEN = os.getenv("BOT_TOKEN")
-REPLICATE_API_TOKEN = os.getenv("REPLICATE_API_TOKEN")
+DEEPAI_API_KEY = os.getenv("DEEPAI_API_KEY")
 
-BASE_PROMPT = """ Ultra clean 3D chibi crypto mascot girl, full body, toy-like smooth 3D render, short chibi proportions, round smooth face, large brown eyes, small soft smile, long straight dark navy blue hair fading to teal at ends, center hair part, no bangs covering eyes, wearing a purple to teal gradient ZIP hoodie (front zipper visible), small white letter "S" logo on the LEFT chest only (not center), no hoodie strings, simple hoodie pocket, wearing matching gradient track pants (not shorts), wearing simple teal sneakers, minimal texture, smooth plastic material look, Pixar-style studio lighting, solid black background, clean render, exact same mascot identity, same outfit design, same proportions """
+BASE_PROMPT = """
+Ultra clean 3D chibi crypto mascot girl,
+full body,
+toy-like smooth 3D render,
+short chibi proportions,
+round smooth face,
+large brown eyes,
+small soft smile,
+long straight dark navy blue hair fading to teal at ends,
+center hair part,
+no bangs covering eyes,
+wearing a purple to teal gradient ZIP hoodie (front zipper visible),
+small white letter "S" logo on the LEFT chest only (not center),
+no hoodie strings,
+simple hoodie pocket,
+wearing matching gradient track pants (not shorts),
+wearing simple teal sneakers,
+minimal texture,
+smooth plastic material look,
+Pixar-style studio lighting,
+solid black background,
+clean render,
+exact same mascot identity,
+same outfit design,
+same proportions
+"""
 
 # ===== TIMEZONE =====
 CHINA_TZ = ZoneInfo("Asia/Shanghai")
@@ -703,8 +728,8 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("Usage: /generate your scene description")
             return
 
-        if not REPLICATE_API_TOKEN:
-            await update.message.reply_text("❌ Missing REPLICATE_API_TOKEN")
+        if not DEEPAI_API_KEY:
+            await update.message.reply_text("❌ Missing DEEPAI_API_KEY")
             return
 
         await update.message.reply_text("🎨 Generating Suolala image...")
@@ -712,45 +737,22 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
         final_prompt = BASE_PROMPT + ", " + user_scene
 
         response = requests.post(
-            "https://api.replicate.com/v1/predictions",
-            headers={
-                "Authorization": f"Token {REPLICATE_API_TOKEN}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "version": "da77bc59ee60423279fd632efb4795ab731d9e3ca9705ef3341091fb989b7eaf",
-                "input": {
-                    "prompt": final_prompt,
-                    "width": 768,
-                    "height": 768
-                }
-            },
-            timeout=120,
+            "https://api.deepai.org/api/text2img",
+            data={"text": final_prompt},
+            headers={"api-key": DEEPAI_API_KEY}
         )
 
-        if response.status_code != 201:
-            await update.message.reply_text(f"❌ Replicate error: {response.text}")
+        if response.status_code != 200:
+            await update.message.reply_text(f"❌ DeepAI error: {response.text}")
             return
 
-        data = response.json()
-        get_url = data["urls"]["get"]
+        image_url = response.json().get("output_url")
 
-        while True:
-            poll = requests.get(
-                get_url,
-                headers={"Authorization": f"Token {REPLICATE_API_TOKEN}"}
-            ).json()
+        if not image_url:
+            await update.message.reply_text("❌ Image generation failed.")
+            return
 
-            if poll.get("status") == "succeeded":
-                image_url = poll["output"][0]
-                await update.message.reply_photo(photo=image_url)
-                return
-
-            if poll.get("status") == "failed":
-                await update.message.reply_text("❌ Image generation failed.")
-                return
-
-            await asyncio.sleep(2)
+        await update.message.reply_photo(photo=image_url)
 
     except Exception as e:
         print("Generate ERROR:", e)
