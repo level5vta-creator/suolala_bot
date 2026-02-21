@@ -717,33 +717,54 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if not update.message:
             return
 
-        full_text = update.message.text
-
-        if not full_text or len(full_text.split(" ", 1)) < 2:
+        prompt_text = " ".join(context.args).strip()
+        if not prompt_text:
             await update.message.reply_text(
                 "Usage: /generate your scene description"
             )
             return
 
-        user_action = full_text.split(" ", 1)[1]
-
-        final_prompt = BASE_PROMPT + ", " + user_action
-
-        encoded_prompt = urllib.parse.quote(final_prompt)
-
-        image_url = (
-            f"https://image.pollinations.ai/prompt/"
-            f"{encoded_prompt}?width=512&height=512&seed={random.randint(1,999999)}"
-        )
-
-        # Download image first
-        response = requests.get(image_url, timeout=30)
-
-        if response.status_code != 200:
-            await update.message.reply_text("❌ Image server error.")
+        hf_token = os.getenv("HF_API_TOKEN") or os.getenv("HUGGINGFACE_API_TOKEN")
+        if not hf_token:
+            await update.message.reply_text("❌ Missing HuggingFace API token (HF_API_TOKEN).")
             return
 
         from io import BytesIO
+        final_prompt = f"{BASE_PROMPT}, {prompt_text}"
+        payload = {
+            "inputs": final_prompt,
+            "parameters": {
+                "width": 768,
+                "height": 768,
+                "num_inference_steps": 30,
+                "guidance_scale": 7.5,
+                "seed": random.randint(1, 999999),
+            },
+            "options": {
+                "wait_for_model": True,
+            },
+        }
+
+        hf_model = "stabilityai/stable-diffusion-2-1"
+        endpoint = f"https://api-inference.huggingface.co/models/{urllib.parse.quote(hf_model, safe='/')}"
+        response = requests.post(
+            endpoint,
+            headers={
+                "Authorization": f"Bearer {hf_token}",
+                "Content-Type": "application/json",
+            },
+            json=payload,
+            timeout=90,
+        )
+
+        if response.status_code != 200:
+            try:
+                err = response.json().get("error", "Unknown error")
+            except Exception:
+                err = response.text[:200]
+            await update.message.reply_text(f"❌ HuggingFace image error: {err}")
+            return
+
         image_bytes = BytesIO(response.content)
         image_bytes.name = "suolala.png"
 
