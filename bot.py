@@ -2,6 +2,7 @@ import os
 import random
 import asyncio
 import sqlite3
+import logging
 import requests
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -24,6 +25,21 @@ MAGICEDEN_LIST_URL = "https://api-mainnet.magiceden.dev/v2/collections/{}/listin
 
 # ===== BOT TOKEN =====
 TOKEN = os.getenv("BOT_TOKEN")
+HF_API_KEY = os.environ.get("HF_API_KEY")
+
+if not HF_API_KEY:
+    logging.critical("HF_API_KEY is missing. Exiting.")
+    raise SystemExit(1)
+
+HF_MODEL_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1"
+BASE_PROMPT = (
+    "Ultra clean 3D chibi crypto mascot girl, full body, toy-like smooth 3D render, "
+    "short chibi proportions, round smooth face, large brown eyes, small soft smile, "
+    "long straight dark navy blue hair fading to teal at ends, center hair part, no bangs covering eyes, "
+    "purple to teal gradient ZIP hoodie (front zipper visible), small white letter \"S\" logo on the LEFT chest only, "
+    "no hoodie strings, simple hoodie pocket, matching gradient track pants (NOT shorts), simple teal sneakers, "
+    "smooth plastic material look, Pixar-style studio lighting, solid black background, exact same mascot identity every time"
+)
 
 # ===== TIMEZONE =====
 CHINA_TZ = ZoneInfo("Asia/Shanghai")
@@ -161,7 +177,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Commands:\n"
         "/price /chart /buy /memes /stickers\n"
         "/x /community /nft /contract /website /rules\n"
-        "/suolala /motivate /count /top /randomnft /translate"
+        "/suolala /motivate /count /top /randomnft /translate /generate"
     )
 
 async def price(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -683,6 +699,39 @@ async def randomnft(update: Update, context: ContextTypes.DEFAULT_TYPE):
         print("RandomNFT ERROR:", e)
         await update.message.reply_text("⚠️ Failed to fetch NFT. Try again later.")
 
+
+async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.args:
+        await update.message.reply_text("Usage: /generate <action or scene>")
+        return
+
+    user_action = " ".join(context.args)
+    final_prompt = BASE_PROMPT + ", " + user_action
+
+    headers = {
+        "Authorization": f"Bearer {HF_API_KEY}"
+    }
+
+    try:
+        response = requests.post(
+            HF_MODEL_URL,
+            headers=headers,
+            json={
+                "inputs": final_prompt,
+                "options": {"wait_for_model": True}
+            },
+            timeout=180,
+        )
+    except requests.exceptions.RequestException:
+        await update.message.reply_text("⚠️ Image service temporarily unavailable. Please try again.")
+        return
+
+    if response.status_code != 200:
+        await update.message.reply_text("⚠️ Image service temporarily unavailable. Please try again.")
+        return
+
+    await update.message.reply_photo(photo=response.content)
+
 # ===== AUTOMATIC MESSAGES =====
 async def automatic_messages(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Automatically send messages based on keywords"""
@@ -822,9 +871,10 @@ app.add_handler(CommandHandler("count", count_cmd))
 app.add_handler(CommandHandler("top", top_cmd))
 app.add_handler(CommandHandler("randomnft", randomnft))
 app.add_handler(CommandHandler("pricecheck", pricecheck))
+app.add_handler(CommandHandler("generate", generate))
 
 print("✅ SUOLALA BOT RUNNING — ALL FEATURES ENABLED")
-print(f"📊 Total commands: 19")
+print(f"📊 Total commands: 20")
 print(f"🤖 Automatic messages: Enabled for 15 keywords")
 print(f"👋 Welcome messages: Fixed and will send properly")
 print(f"🕒 Welcome messages: Auto-delete after 5 minutes")
