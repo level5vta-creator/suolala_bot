@@ -703,8 +703,7 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("Usage: /generate your scene description")
             return
 
-        token = os.getenv("REPLICATE_API_TOKEN")
-        if not token:
+        if not REPLICATE_API_TOKEN:
             await update.message.reply_text("❌ Missing REPLICATE_API_TOKEN")
             return
 
@@ -715,18 +714,18 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
         response = requests.post(
             "https://api.replicate.com/v1/predictions",
             headers={
-                "Authorization": f"Token {token}",
-                "Content-Type": "application/json"
+                "Authorization": f"Token {REPLICATE_API_TOKEN}",
+                "Content-Type": "application/json",
             },
             json={
-                "model": "stability-ai/sdxl",
+                "version": "da77bc59ee60423279fd632efb4795ab731d9e3ca9705ef3341091fb989b7eaf",
                 "input": {
                     "prompt": final_prompt,
                     "width": 768,
                     "height": 768
                 }
             },
-            timeout=120
+            timeout=120,
         )
 
         if response.status_code != 201:
@@ -739,7 +738,7 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
         while True:
             poll = requests.get(
                 get_url,
-                headers={"Authorization": f"Token {token}"}
+                headers={"Authorization": f"Token {REPLICATE_API_TOKEN}"}
             ).json()
 
             if poll.get("status") == "succeeded":
