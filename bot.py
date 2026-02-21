@@ -741,22 +741,19 @@ same proportions,
 {user_action}
 """
 
-        payload = {
-            "version": "db21e45f6d96a3d18d3c5b3d9dcb1d7c8b9c2a0fbb6f50e9f1c0e1c9c3e2f123",
-            "input": {
-                "prompt": final_prompt,
-                "width": 768,
-                "height": 768
-            }
-        }
-
         response = requests.post(
-            "https://api.replicate.com/v1/predictions",
+            "https://api.replicate.com/v1/models/stability-ai/sdxl/predictions",
             headers={
                 "Authorization": f"Token {REPLICATE_API_TOKEN}",
                 "Content-Type": "application/json"
             },
-            json=payload,
+            json={
+                "input": {
+                    "prompt": final_prompt,
+                    "width": 768,
+                    "height": 768
+                }
+            },
             timeout=120
         )
 
