@@ -3,6 +3,7 @@ import random
 import asyncio
 import sqlite3
 import requests
+import aiohttp
 import urllib.parse
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -24,34 +25,10 @@ MAGICEDEN_COLLECTION = "suolala_"
 MAGICEDEN_LIST_URL = "https://api-mainnet.magiceden.dev/v2/collections/{}/listings?offset=0&limit=100"
 
 # ===== BOT TOKEN =====
-TOKEN = os.getenv("BOT_TOKEN")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+POLLINATIONS_API_KEY = os.getenv("POLLINATIONS_API_KEY")
 
-BASE_PROMPT = """
-Ultra clean 3D chibi crypto mascot girl,
-full body,
-toy-like smooth 3D render,
-short chibi proportions,
-round smooth face,
-large brown eyes,
-small soft smile,
-long straight dark navy blue hair fading to teal at ends,
-center hair part,
-no bangs covering eyes,
-wearing a purple to teal gradient ZIP hoodie (front zipper visible),
-small white letter "S" logo on the LEFT chest only (not center),
-no hoodie strings,
-simple hoodie pocket,
-wearing matching gradient track pants (not shorts),
-wearing simple teal sneakers,
-minimal texture,
-smooth plastic material look,
-Pixar-style studio lighting,
-solid black background,
-clean render,
-exact same mascot identity,
-same outfit design,
-same proportions
-"""
+BASE_PROMPT = 'Ultra clean 3D chibi crypto mascot girl, full body, toy-like smooth 3D render, short chibi proportions, round smooth face, large brown eyes, small soft smile, long straight dark navy blue hair fading to teal at ends, center hair part, no bangs covering eyes, wearing a purple to teal gradient ZIP hoodie (front zipper visible), small white letter "S" logo on the LEFT chest only (not center), no hoodie strings, simple hoodie pocket, wearing matching gradient track pants (not shorts), wearing simple teal sneakers, minimal texture, smooth plastic material look, Pixar-style studio lighting, solid black background, clean render, exact same mascot identity, same outfit design, same proportions,'
 
 # ===== TIMEZONE =====
 CHINA_TZ = ZoneInfo("Asia/Shanghai")
@@ -731,13 +708,18 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await update.message.reply_text("🎨 Generating Suolala image...")
 
-        final_prompt = BASE_PROMPT + ", " + user_scene
-
+        final_prompt = BASE_PROMPT + " " + user_scene
         encoded_prompt = urllib.parse.quote(final_prompt)
-
         image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}"
+        headers = {"Authorization": f"Bearer {POLLINATIONS_API_KEY}"}
 
-        await update.message.reply_photo(photo=image_url)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(image_url, headers=headers) as response:
+                if response.status != 200:
+                    raise Exception(await response.text())
+                image_bytes = await response.read()
+
+        await update.message.reply_photo(photo=image_bytes)
 
     except Exception as e:
         print("Generate ERROR:", e)
@@ -854,7 +836,7 @@ async def automatic_messages(update: Update, context: ContextTypes.DEFAULT_TYPE)
             break  # Only respond to one keyword per message
 
 def main():
-    application = ApplicationBuilder().token(TOKEN).post_init(post_init).build()
+    application = ApplicationBuilder().token(BOT_TOKEN).post_init(post_init).build()
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("generate", generate))
