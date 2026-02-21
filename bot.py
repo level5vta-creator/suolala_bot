@@ -746,7 +746,7 @@ async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
 
         hf_model = "stabilityai/stable-diffusion-2-1"
-        endpoint = f"https://api-inference.huggingface.co/models/{urllib.parse.quote(hf_model, safe='/')}"
+        endpoint = f"https://router.huggingface.co/hf-inference/models/{urllib.parse.quote(hf_model, safe='/')}"
         response = requests.post(
             endpoint,
             headers={
