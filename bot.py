@@ -24,34 +24,9 @@ MAGICEDEN_COLLECTION = "suolala_"
 MAGICEDEN_LIST_URL = "https://api-mainnet.magiceden.dev/v2/collections/{}/listings?offset=0&limit=100"
 
 # ===== BOT TOKEN =====
-TOKEN = os.getenv("BOT_TOKEN")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 
-BASE_PROMPT = """
-Ultra clean 3D chibi crypto mascot girl,
-full body,
-toy-like smooth 3D render,
-short chibi proportions,
-round smooth face,
-large brown eyes,
-small soft smile,
-long straight dark navy blue hair fading to teal at ends,
-center hair part,
-no bangs covering eyes,
-wearing a purple to teal gradient ZIP hoodie (front zipper visible),
-small white letter "S" logo on the LEFT chest only (not center),
-no hoodie strings,
-simple hoodie pocket,
-wearing matching gradient track pants (not shorts),
-wearing simple teal sneakers,
-minimal texture,
-smooth plastic material look,
-Pixar-style studio lighting,
-solid black background,
-clean render,
-exact same mascot identity,
-same outfit design,
-same proportions
-"""
+BASE_PROMPT = "Ultra clean 3D chibi crypto mascot girl, full body, toy-like smooth 3D render, short chibi proportions, round smooth face, large brown eyes, small soft smile, long straight dark navy blue hair fading to teal at ends, center hair part, no bangs covering eyes, wearing a purple to teal gradient ZIP hoodie (front zipper visible), small white letter \"S\" logo on the LEFT chest only (not center), no hoodie strings, simple hoodie pocket, wearing matching gradient track pants (not shorts), wearing simple teal sneakers, minimal texture, smooth plastic material look, Pixar-style studio lighting, solid black background, clean render, exact same mascot identity, same outfit design, same proportions,"
 
 # ===== TIMEZONE =====
 CHINA_TZ = ZoneInfo("Asia/Shanghai")
@@ -713,35 +688,18 @@ async def randomnft(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    try:
-        if not update.message:
-            return
+    if not update.message:
+        return
 
-        text = update.message.text or ""
+    user_scene = " ".join(context.args).strip()
+    if not user_scene:
+        await update.message.reply_text("Usage: /generate your scene description")
+        return
 
-        if " " not in text:
-            await update.message.reply_text("Usage: /generate your scene description")
-            return
-
-        user_scene = text.split(" ", 1)[1].strip()
-
-        if not user_scene:
-            await update.message.reply_text("Usage: /generate your scene description")
-            return
-
-        await update.message.reply_text("🎨 Generating Suolala image...")
-
-        final_prompt = BASE_PROMPT + ", " + user_scene
-
-        encoded_prompt = urllib.parse.quote(final_prompt)
-
-        image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}"
-
-        await update.message.reply_photo(photo=image_url)
-
-    except Exception as e:
-        print("Generate ERROR:", e)
-        await update.message.reply_text("❌ Image generation failed.")
+    final_prompt = f"{BASE_PROMPT} {user_scene}"
+    encoded_prompt = urllib.parse.quote(final_prompt)
+    image_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}"
+    await update.message.reply_photo(photo=image_url)
 
 
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -854,7 +812,7 @@ async def automatic_messages(update: Update, context: ContextTypes.DEFAULT_TYPE)
             break  # Only respond to one keyword per message
 
 def main():
-    application = ApplicationBuilder().token(TOKEN).post_init(post_init).build()
+    application = ApplicationBuilder().token(BOT_TOKEN).post_init(post_init).build()
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("generate", generate))
@@ -890,7 +848,7 @@ def main():
     print(f"👋 Welcome messages: Fixed and will send properly")
     print(f"🕒 Welcome messages: Auto-delete after 5 minutes")
     print(f"💬 Auto-responses: Delete after 1 minute")
-    application.run_polling(drop_pending_updates=True)
+    application.run_polling()
 
 
 if __name__ == "__main__":
