@@ -712,25 +712,36 @@ async def randomnft(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("⚠️ Failed to fetch NFT. Try again later.")
 
 
-async def generate(update, context):
-    if not context.args:
-        await update.message.reply_text(
-            "Usage: /generate your scene description"
+async def generate(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
+        if not update.message:
+            return
+
+        # Get full text after command manually
+        full_text = update.message.text
+
+        if not full_text or len(full_text.split(" ", 1)) < 2:
+            await update.message.reply_text(
+                "Usage: /generate your scene description"
+            )
+            return
+
+        user_action = full_text.split(" ", 1)[1]
+
+        final_prompt = BASE_PROMPT + ", " + user_action
+
+        encoded_prompt = urllib.parse.quote(final_prompt)
+
+        image_url = (
+            f"https://image.pollinations.ai/prompt/"
+            f"{encoded_prompt}?width=512&height=512&seed={random.randint(1,999999)}"
         )
-        return
 
-    user_action = " ".join(context.args)
+        await update.message.reply_photo(photo=image_url)
 
-    final_prompt = BASE_PROMPT + ", " + user_action
-
-    encoded_prompt = urllib.parse.quote(final_prompt)
-
-    image_url = (
-        f"https://image.pollinations.ai/prompt/"
-        f"{encoded_prompt}?width=512&height=512"
-    )
-
-    await update.message.reply_photo(photo=image_url)
+    except Exception as e:
+        print("Generate ERROR:", e)
+        await update.message.reply_text("❌ Image generation failed.")
 
 
 async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE):
