@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUOLALA Meme Wall - Admin Panel</title>
+
+    <script>
+        // CRITICAL: Auth Guard - Must run first before any other script
+        if (sessionStorage.getItem('isAdmin') !== 'true') {
+            window.location.replace('login.html');
+        }
+    </script>
+
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="admin.css">
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import {
+            getFirestore,
+            collection,
+            query,
+            where,
+            onSnapshot,
+            updateDoc,
+            doc,
+            Timestamp,
+            orderBy,
+            getDocs,
+            deleteDoc
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import {
+            getStorage,
+            ref,
+            deleteObject
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+        // Your Firebase config (unchanged)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDyNWUJEAxhrL2MmHYiNh2AMPhlqgT7aIc",
+            authDomain: "suolala-meme-wall.firebaseapp.com",
+            projectId: "suolala-meme-wall",
+            storageBucket: "suolala-meme-wall.firebasestorage.app",
+            messagingSenderId: "183627335961",
+            appId: "1:183627335961:web:b324a08fde681be2f1dd88"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // Make Firebase instances globally available
+        window.firebase = { db, storage, updateDoc, doc, collection, query, where, onSnapshot, Timestamp, orderBy, getDocs, deleteDoc, ref, deleteObject };
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* SUOLALA/Solana Theme Colors */
+            --primary-dark: #0a0b14;
+            --secondary-dark: #141522;
+            --accent-purple: #9945FF;
+            --accent-cyan: #00D1FF;
+            --accent-green: #14F195;
+            --text-primary: #FFFFFF;
+            --text-secondary: #A0A0C0;
+            --text-muted: #6B7280;
+            --border-color: rgba(153, 69, 255, 0.2);
+            --success-bg: rgba(20, 241, 149, 0.1);
+            --reject-bg: rgba(239, 68, 68, 0.1);
+            --pending-bg: rgba(245, 158, 11, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+        }
+
+        /* Glassmorphism Effect */
+        .glass-card {
+            background: rgba(20, 21, 34, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Admin Header */
+        .admin-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 11, 20, 0.9);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .stats-container {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        /* Main Container */
+        .main-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: calc(100vh - 80px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            padding: 2rem;
+            border-right: 1px solid var(--border-color);
+            background: rgba(15, 16, 28, 0.8);
+        }
+
+        .filter-section {
+            margin-bottom: 2rem;
+        }
+
+        .filter-section h3 {
+            margin-bottom: 1rem;
+            color: var(--accent-cyan);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .filter-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1rem;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--accent-purple);
+            color: var(--text-primary);
+            transform: translateX(5px);
+        }
+
+        .filter-btn.active {
+            background: rgba(153, 69, 255, 0.15);
+            border-color: var(--accent-purple);
+            color: var(--text-primary);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-left: auto;
+        }
+
+        .status-pending {
+            background: var(--pending-bg);
+            color: #f59e0b;
+        }
+
+        .status-approved {
+            background: var(--success-bg);
+            color: var(--accent-green);
+        }
+
+        .status-rejected {
+            background: var(--reject-bg);
+            color: #ef4444;
+        }
+
+        /* Meme Grid */
+        .content-area {
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .meme-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .meme-card {
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .meme-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-purple);
+            box-shadow: 0 12px 40px rgba(153, 69, 255, 0.2);
+        }
+
+        .meme-image-container {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .meme-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .meme-image:hover {
+            transform: scale(1.05);
+        }
+
+        .meme-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .meme-id {
+            font-family: 'Space Grotesk', monospace;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .meme-date {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.625rem 1.5rem;
+            border-radius: 10px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 0.875rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .btn-approve {
+            background: linear-gradient(135deg, var(--accent-green), #10b981);
+            color: #000;
+        }
+
+        .btn-approve:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(20, 241, 149, 0.4);
+        }
+
+        .btn-reject {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .btn-reject:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-view {
+            background: rgba(153, 69, 255, 0.15);
+            color: var(--accent-purple);
+            border: 1px solid var(--accent-purple);
+        }
+
+        .btn-view:hover {
+            background: rgba(153, 69, 255, 0.25);
+        }
+
+        /* Loading States */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-purple);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 250px 1fr;
+            }
+
+            .meme-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+
+            /* Sidebar visible on mobile for menu access */
+            .sidebar {
+                display: block;
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .meme-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-container {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Admin Header -->
+    <header class="admin-header glass-card">
+        <div class="logo-container">
+            <div class="logo-icon">S</div>
+            <div>
+                <h1>SUOLALA Meme Wall</h1>
+                <p style="color: var(--text-secondary); font-size: 0.875rem;">Admin Panel</p>
+            </div>
+        </div>
+
+        <div>
+            <button id="goToMemesBtn" class="solana-nav-btn">
+                <i class="fas fa-rocket"></i> Go to Meme Wall
+            </button>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-item">
+                <div class="stat-number" id="pending-count">0</div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="approved-count">0</div>
+                <div class="stat-label">Approved</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="rejected-count">0</div>
+                <div class="stat-label">Rejected</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="filter-section">
+                <h3>Filter by Status</h3>
+                <div class="filter-options">
+                    <button class="filter-btn active" data-filter="all">
+                        All Memes
+                        <span class="status-badge" id="all-count">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="pending">
+                        Pending Review
+                        <span class="status-badge status-pending" id="sidebar-pending-count">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="approved">
+                        Approved
+                        <span class="status-badge status-approved" id="sidebar-approved-count">0</span>
+                    </button>
+                    <button class="filter-btn" data-filter="rejected">
+                        Rejected
+                        <span class="status-badge status-rejected" id="sidebar-rejected-count">0</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3>Quick Actions</h3>
+                <div class="filter-options">
+                    <button class="filter-btn" id="refresh-btn">
+                        🔄 Refresh Data
+                    </button>
+                    <button class="filter-btn" id="bulk-approve-btn">
+                        ✅ Bulk Approve All Pending
+                    </button>
+
+                </div>
+            </div>
+        </aside>
+
+        <!-- Content Area -->
+        <main class="content-area">
+            <div id="meme-grid" class="meme-grid">
+                <!-- Memes will be loaded here -->
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading memes...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for Image Preview -->
+    <div class="modal" id="image-modal">
+        <div class="modal-content glass-card" style="padding: 2rem;">
+            <div class="modal-header">
+                <h2>Meme Preview</h2>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div id="modal-image-container"
+                style="width: 100%; border-radius: 12px; overflow: hidden; margin-bottom: 1.5rem;">
+                <img id="modal-image" src="" alt="" style="width: 100%; max-height: 60vh; object-fit: contain;">
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button class="btn btn-approve" id="modal-approve">Approve</button>
+                <button class="btn btn-reject" id="modal-reject">Reject</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Admin Panel Application
+        class MemeAdminPanel {
+            constructor() {
+                this.db = window.firebase.db;
+                this.storage = window.firebase.storage;
+                this.memes = [];
+                this.filteredMemes = [];
+                this.currentFilter = 'all';
+                this.currentMemeId = null;
+
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.loadMemes();
+                this.setupRealTimeUpdates();
+            }
+
+            bindEvents() {
+                // Fixed: Added event listener for Go to Meme Wall button
+                const goToMemesBtn = document.getElementById('goToMemesBtn');
+                if (goToMemesBtn) {
+                    goToMemesBtn.addEventListener('click', () => {
+                        sessionStorage.removeItem('isAdmin');
+                        window.location.href = '../memes.html';
+                    });
+                }
+
+                // Filter buttons
+                document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const filter = e.target.dataset.filter;
+                        this.setFilter(filter);
+                    });
+                });
+
+                // Quick action buttons
+                document.getElementById('refresh-btn').addEventListener('click', () => this.loadMemes());
+                document.getElementById('bulk-approve-btn').addEventListener('click', () => this.bulkApprove());
+
+
+                // Modal
+                document.getElementById('modal-close').addEventListener('click', () => this.closeModal());
+                document.getElementById('modal-approve').addEventListener('click', () => this.approveMeme(this.currentMemeId));
+                document.getElementById('modal-reject').addEventListener('click', () => this.rejectMeme(this.currentMemeId));
+
+                // Close modal on background click
+                document.getElementById('image-modal').addEventListener('click', (e) => {
+                    if (e.target.id === 'image-modal') this.closeModal();
+                });
+            }
+
+            async loadMemes() {
+                const memeGrid = document.getElementById('meme-grid');
+                memeGrid.innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading memes...</p>
+                    </div>
+                `;
+
+                try {
+                    const memesRef = window.firebase.collection(this.db, 'memes');
+                    const q = window.firebase.query(memesRef, window.firebase.orderBy('createdAt', 'desc'));
+                    const snapshot = await window.firebase.getDocs(q);
+
+                    this.memes = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data(),
+                        createdAt: doc.data().createdAt?.toDate() || new Date()
+                    }));
+
+                    this.updateStats();
+                    this.renderMemes();
+                } catch (error) {
+                    console.error('Error loading memes:', error);
+                    memeGrid.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">⚠️</div>
+                            <h3>Error Loading Memes</h3>
+                            <p>${error.message}</p>
+                            <button class="btn btn-view" onclick="adminPanel.loadMemes()">Retry</button>
+                        </div>
+                    `;
+                }
+            }
+
+            setupRealTimeUpdates() {
+                const memesRef = window.firebase.collection(this.db, 'memes');
+                const q = window.firebase.query(memesRef);
+
+                window.firebase.onSnapshot(q, (snapshot) => {
+                    snapshot.docChanges().forEach(change => {
+                        if (change.type === 'added' || change.type === 'modified') {
+                            this.loadMemes(); // Reload for simplicity
+                        }
+                    });
+                });
+            }
+
+            updateStats() {
+                const pending = this.memes.filter(m => m.status === 'pending').length;
+                const approved = this.memes.filter(m => m.status === 'approved').length;
+                const rejected = this.memes.filter(m => m.status === 'rejected').length;
+
+                // Update header stats
+                document.getElementById('pending-count').textContent = pending;
+                document.getElementById('approved-count').textContent = approved;
+                document.getElementById('rejected-count').textContent = rejected;
+
+                // Update sidebar stats
+                document.getElementById('all-count').textContent = this.memes.length;
+                document.getElementById('sidebar-pending-count').textContent = pending;
+                document.getElementById('sidebar-approved-count').textContent = approved;
+                document.getElementById('sidebar-rejected-count').textContent = rejected;
+            }
+
+            setFilter(filter) {
+                this.currentFilter = filter;
+
+                // Update active button
+                document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.filter === filter);
+                });
+
+                // Filter memes
+                if (filter === 'all') {
+                    this.filteredMemes = this.memes;
+                } else {
+                    this.filteredMemes = this.memes.filter(meme => meme.status === filter);
+                }
+
+                this.renderMemes();
+            }
+
+            renderMemes() {
+                const memeGrid = document.getElementById('meme-grid');
+
+                if (this.filteredMemes.length === 0) {
+                    let message = '';
+                    switch (this.currentFilter) {
+                        case 'pending':
+                            message = 'No pending memes to review. Great job! 🎉';
+                            break;
+                        case 'approved':
+                            message = 'No approved memes yet.';
+                            break;
+                        case 'rejected':
+                            message = 'No rejected memes.';
+                            break;
+                        default:
+                            message = 'No memes found.';
+                    }
+
+                    memeGrid.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📭</div>
+                            <h3>${message}</h3>
+                            <p style="color: var(--text-secondary); margin-top: 0.5rem;">
+                                ${this.currentFilter === 'all' ? 'Memes will appear here once uploaded.' : ''}
+                            </p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                memeGrid.innerHTML = this.filteredMemes.map(meme => this.createMemeCard(meme)).join('');
+
+                // Add event listeners to the new buttons
+                this.filteredMemes.forEach(meme => {
+                    const approveBtn = document.getElementById(`approve-${meme.id}`);
+                    const rejectBtn = document.getElementById(`reject-${meme.id}`);
+                    const viewBtn = document.getElementById(`view-${meme.id}`);
+
+                    if (approveBtn) {
+                        approveBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            this.approveMeme(meme.id);
+                        });
+                    }
+
+                    if (rejectBtn) {
+                        rejectBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            this.rejectMeme(meme.id);
+                        });
+                    }
+
+                    if (viewBtn) {
+                        viewBtn.addEventListener('click', () => this.openModal(meme));
+                    }
+                });
+            }
+
+            createMemeCard(meme) {
+                const date = new Date(meme.timestamp);
+                const formattedDate = date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                let statusClass = '';
+                let statusText = '';
+
+                switch (meme.status) {
+                    case 'pending':
+                        statusClass = 'status-pending';
+                        statusText = 'Pending';
+                        break;
+                    case 'approved':
+                        statusClass = 'status-approved';
+                        statusText = 'Approved';
+                        break;
+                    case 'rejected':
+                        statusClass = 'status-rejected';
+                        statusText = 'Rejected';
+                        break;
+                }
+
+                return `
+                    <div class="meme-card glass-card" data-meme-id="${meme.id}">
+                        <div class="meme-image-container" onclick="adminPanel.openModal(${JSON.stringify(meme).replace(/"/g, '&quot;')})">
+                            <img src="${meme.imageUrl}" alt="Meme ${meme.id}" class="meme-image" loading="lazy">
+                        </div>
+                        
+                        <div class="meme-meta">
+                            <div>
+                                <div class="meme-id">ID: ${meme.id.substring(0, 8)}...</div>
+                                <div class="meme-date">${formattedDate}</div>
+                            </div>
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                        </div>
+                        
+                        <div class="action-buttons">
+                            ${meme.status === 'pending' ? `
+                                <button class="btn btn-approve" id="approve-${meme.id}">Approve</button>
+                                <button class="btn btn-reject" id="reject-${meme.id}">Reject</button>
+                            ` : ''}
+                            <button class="btn btn-view" id="view-${meme.id}">View</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            openModal(meme) {
+                this.currentMemeId = meme.id;
+                const modal = document.getElementById('image-modal');
+                const modalImage = document.getElementById('modal-image');
+
+                modalImage.src = meme.imageUrl;
+                modalImage.alt = `Meme ${meme.id}`;
+
+                // Show/hide action buttons based on status
+                const approveBtn = document.getElementById('modal-approve');
+                const rejectBtn = document.getElementById('modal-reject');
+
+                if (meme.status === 'pending') {
+                    approveBtn.style.display = 'block';
+                    rejectBtn.style.display = 'block';
+                } else {
+                    approveBtn.style.display = 'none';
+                    rejectBtn.style.display = 'none';
+                }
+
+                modal.classList.add('active');
+            }
+
+            closeModal() {
+                document.getElementById('image-modal').classList.remove('active');
+                this.currentMemeId = null;
+            }
+
+            async approveMeme(memeId) {
+                if (!memeId) return;
+
+                try {
+                    const memeRef = window.firebase.doc(this.db, 'memes', memeId);
+                    await window.firebase.updateDoc(memeRef, {
+                        status: 'approved',
+                        reviewedAt: new Date(),
+                        reviewedBy: 'admin'
+                    });
+
+                    this.showNotification('Meme approved successfully!', 'success');
+                    this.closeModal();
+                } catch (error) {
+                    console.error('Error approving meme:', error);
+                    this.showNotification('Failed to approve meme', 'error');
+                }
+            }
+
+            async rejectMeme(memeId) {
+                if (!memeId) return;
+
+                try {
+                    const memeRef = window.firebase.doc(this.db, 'memes', memeId);
+                    await window.firebase.updateDoc(memeRef, {
+                        status: 'rejected',
+                        reviewedAt: new Date(),
+                        reviewedBy: 'admin'
+                    });
+
+                    this.showNotification('Meme rejected successfully!', 'success');
+                    this.closeModal();
+                } catch (error) {
+                    console.error('Error rejecting meme:', error);
+                    this.showNotification('Failed to reject meme', 'error');
+                }
+            }
+
+            async bulkApprove() {
+                const pendingMemes = this.memes.filter(m => m.status === 'pending');
+
+                if (pendingMemes.length === 0) {
+                    this.showNotification('No pending memes to approve', 'info');
+                    return;
+                }
+
+                if (!confirm(`Are you sure you want to approve all ${pendingMemes.length} pending memes?`)) {
+                    return;
+                }
+
+                try {
+                    const batchPromises = pendingMemes.map(meme => {
+                        const memeRef = window.firebase.doc(this.db, 'memes', meme.id);
+                        return window.firebase.updateDoc(memeRef, {
+                            status: 'approved',
+                            reviewedAt: new Date(),
+                            reviewedBy: 'admin'
+                        });
+                    });
+
+                    await Promise.all(batchPromises);
+                    this.showNotification(`Successfully approved ${pendingMemes.length} memes!`, 'success');
+                } catch (error) {
+                    console.error('Error in bulk approval:', error);
+                    this.showNotification('Failed to approve all memes', 'error');
+                }
+            }
+
+            showNotification(message, type = 'info') {
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = `glass-card`;
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 1rem 1.5rem;
+                    border-radius: 10px;
+                    z-index: 10000;
+                    animation: slideIn 0.3s ease;
+                    border-left: 4px solid ${type === 'success' ? 'var(--accent-green)' :
+                        type === 'error' ? '#ef4444' :
+                            'var(--accent-cyan)'
+                    };
+                `;
+
+                notification.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div style="font-size: 1.25rem;">
+                            ${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}
+                        </div>
+                        <div>
+                            <strong>${type.charAt(0).toUpperCase() + type.slice(1)}:</strong>
+                            <div style="font-size: 0.875rem; margin-top: 0.25rem;">${message}</div>
+                        </div>
+                    </div>
+                `;
+
+                document.body.appendChild(notification);
+
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+
+                // Add animation styles
+                if (!document.getElementById('notification-styles')) {
+                    const style = document.createElement('style');
+                    style.id = 'notification-styles';
+                    style.textContent = `
+                        @keyframes slideIn {
+                            from { transform: translateX(100%); opacity: 0; }
+                            to { transform: translateX(0); opacity: 1; }
+                        }
+                        @keyframes slideOut {
+                            from { transform: translateX(0); opacity: 1; }
+                            to { transform: translateX(100%); opacity: 0; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+        }
+
+        // Initialize the admin panel when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.adminPanel = new MemeAdminPanel();
+        });
+    </script>
+</body>
+
+</html>
+    
