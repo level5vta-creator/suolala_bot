@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUOLALA - Crypto News Speaker</title>
+    <link rel="stylesheet" href="style2.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🔊%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <div class="solana-logo">
+                    <div class="solana-inner"></div>
+                    <div class="solana-inner"></div>
+                    <div class="solana-inner"></div>
+                </div>
+                <span class="logo-text">SUOLALA</span>
+            </div>
+            
+            <div class="nav-menu desktop-menu">
+                <a href="index.html#home" class="nav-link">Home</a>
+                <a href="index.html#token" class="nav-link">Token</a>
+                <a href="index2.html" class="nav-link active">News</a>
+                <a href="index.html#nfts" class="nav-link">NFTs</a>
+                <a href="index.html#roadmap" class="nav-link">Roadmap</a>
+                <a href="memes.html" class="nav-link">Meme Wall</a>
+            </div>
+            
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Language Toggle -->
+    <div class="language-toggle">
+        <button class="lang-btn active" id="langEn" title="English">
+            <img src="https://flagcdn.com/w40/gb.png" alt="English" class="flag-icon">
+        </button>
+        <button class="lang-btn" id="langZh" title="中文">
+            <img src="https://flagcdn.com/w40/cn.png" alt="中文" class="flag-icon">
+        </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay">
+        <div class="mobile-menu-container">
+            <button class="mobile-menu-close" id="mobileMenuClose">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="mobile-menu-content">
+                <a href="index.html#home" class="mobile-nav-link">Home</a>
+                <a href="index.html#token" class="mobile-nav-link">Token</a>
+                <a href="index2.html" class="mobile-nav-link active">News</a>
+                <a href="index.html#nfts" class="mobile-nav-link">NFTs</a>
+                <a href="index.html#roadmap" class="mobile-nav-link">Roadmap</a>
+                <a href="memes.html" class="mobile-nav-link">Meme Wall</a>
+                <div class="mobile-social">
+                    <a href="https://x.com/suolalax" target="_blank" class="mobile-social-btn">
+                        <svg class="x-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> X
+                    </a>
+                    <a href="https://t.me/suolalacto" target="_blank" class="mobile-social-btn">
+                        <i class="fab fa-telegram"></i> Telegram
+                    </a>
+                    <a href="https://trends.fun/token/CY1P83KnKwFYostvjQcoR2HJLyEJWRBRaVQmYyyD3cR8" target="_blank" class="mobile-social-btn">
+                        <i class="fas fa-fire"></i> trends.fun
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Animated Background -->
+    <div class="animated-bg">
+        <div class="grid-overlay"></div>
+        <div class="particles" id="particles"></div>
+        <div class="glow-orb glow-orb-1"></div>
+        <div class="glow-orb glow-orb-2"></div>
+        <div class="glow-orb glow-orb-3"></div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="video-wrapper">
+                    <div class="video-container">
+                        <video id="suolalaVideo" class="suolala-video" muted loop playsinline>
+                            <source src="suolalaspeak.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                        <div class="video-watermark">SUOLALA</div>
+                        <div class="video-glow"></div>
+                    </div>
+                </div>
+                
+                <div class="hero-text">
+                    <h1 class="hero-title">
+                        <span class="gradient-text">SUOLALA</span>
+                        <span class="hero-subtitle">Crypto News Speaker</span>
+                    </h1>
+                    <p class="hero-description">
+                        Real-time Solana & Crypto News, Spoken by Suolala
+                    </p>
+                    
+                    <div class="current-news" id="currentNews">
+                        <p class="current-news-label">Now Speaking</p>
+                        <h2 class="current-news-title" id="currentNewsTitle">
+                            Select a news item below to hear it
+                        </h2>
+                        <div class="subtitle-container">
+                            <div class="subtitle" id="subtitle">
+                                Hi, I'm Suolala. Ready to share the latest crypto news with you.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="hero-controls">
+                        <button id="speakEnglishBtn" class="btn-speak gradient-btn">
+                            <span class="btn-icon">▶</span>
+                            <span class="btn-text">Speak English</span>
+                        </button>
+                        <button id="speakChineseBtn" class="btn-speak gradient-btn-alt">
+                            <span class="btn-icon">▶</span>
+                            <span class="btn-text">中文播报</span>
+                        </button>
+                        <button id="stopBtn" class="btn-stop">
+                            <span class="btn-icon">⏹</span>
+                            <span class="btn-text">Stop</span>
+                        </button>
+                    </div>
+                    
+                    <div class="voice-status" id="voiceStatus">
+                        <div class="status-dot"></div>
+                        <span>Female Voice EN / CN Ready</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- News Section -->
+    <section class="news-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">
+                    <span class="gradient-text">Latest</span> Crypto News
+                </h2>
+                <p class="section-subtitle">Click any news to hear Suolala speak it</p>
+                
+                <div class="filter-controls">
+                    <button class="filter-btn active" data-filter="today">Today</button>
+                    <button class="filter-btn" data-filter="yesterday">Yesterday</button>
+                </div>
+                
+                <button id="refreshNewsBtn" class="btn-refresh">
+                    <span class="refresh-icon">↻</span>
+                    Refresh News
+                </button>
+            </div>
+            
+            <div class="news-grid" id="newsGrid">
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <p>Loading latest crypto news...</p>
+                </div>
+            </div>
+            
+            <div class="news-sources">
+                <div class="source-badge">CoinTelegraph</div>
+                <div class="source-badge">CoinDesk</div>
+                <div class="source-badge">Solana Blog</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Share Modal -->
+    <div class="modal" id="shareModal">
+        <div class="modal-content">
+            <h3>Share This News</h3>
+            <p>Copy this link to share directly to this news item:</p>
+            <div class="share-input-group">
+                <input type="text" id="shareLink" readonly>
+                <button id="copyLinkBtn" class="btn-copy">Copy</button>
+            </div>
+            <button id="closeModalBtn" class="btn-close-modal">Close</button>
+        </div>
+    </div>
+
+    <!-- Download Progress Modal -->
+    <div class="modal" id="downloadModal">
+        <div class="modal-content">
+            <h3>Generating Video</h3>
+            <p id="downloadStatus">Preparing video with audio...</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <button id="cancelDownloadBtn" class="btn-close-modal">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-brand">
+                <span class="gradient-text">SUOLALA</span>
+            </div>
+            <p>Crypto News Speaker • 100% Free</p>
+            <p class="footer-note">Solana-style AI news experience. Female voice synthesis only.</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

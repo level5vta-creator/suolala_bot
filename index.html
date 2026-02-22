@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUOLALA - The Solana Meme Revolution</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Background Animation Elements -->
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+    <div class="floating-shapes"></div>
+    <div class="particles-container"></div>
+    
+    <!-- Language Toggle -->
+    <div class="language-toggle">
+        <button class="lang-btn active" id="langEn" title="English">
+            <img src="https://flagcdn.com/w40/gb.png" alt="English" class="flag-icon">
+        </button>
+        <button class="lang-btn" id="langZh" title="中文">
+            <img src="https://flagcdn.com/w40/cn.png" alt="中文" class="flag-icon">
+        </button>
+    </div>
+    
+    <!-- Navigation - RESPONSIVE FROM MEMES -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <div class="solana-logo">
+                    <div class="solana-inner"></div>
+                    <div class="solana-inner"></div>
+                    <div class="solana-inner"></div>
+                </div>
+                <span class="logo-text" data-i18n="nav.title">SUOLALA</span>
+            </div>
+            
+            <div class="nav-menu desktop-menu">
+                <a href="#home" class="nav-link" data-i18n="nav.home">Home</a>
+                <a href="#token" class="nav-link" data-i18n="nav.token">Token</a>
+                <a href="index2.html" class="nav-link external-link" data-i18n="nav.news">News</a>
+                <a href="#nfts" class="nav-link" data-i18n="nav.nfts">NFTs</a>
+                <a href="#roadmap" class="nav-link" data-i18n="nav.roadmap">Roadmap</a>
+                <a href="memes.html" class="nav-link" data-i18n="nav.memes">Meme Wall</a>
+            </div>
+            
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu - RESPONSIVE FROM MEMES -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay">
+        <div class="mobile-menu-container">
+            <button class="mobile-menu-close" id="mobileMenuClose">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="mobile-menu-content">
+                <a href="#home" class="mobile-nav-link" data-i18n="nav.home">Home</a>
+                <a href="#token" class="mobile-nav-link" data-i18n="nav.token">Token</a>
+                <a href="index2.html" class="mobile-nav-link external-link" data-i18n="nav.news">News</a>
+                <a href="#nfts" class="mobile-nav-link" data-i18n="nav.nfts">NFTs</a>
+                <a href="#roadmap" class="mobile-nav-link" data-i18n="nav.roadmap">Roadmap</a>
+                <a href="memes.html" class="mobile-nav-link" data-i18n="nav.memes">Meme Wall</a>
+                <div class="mobile-social">
+                    <a href="https://x.com/suolalax" target="_blank" class="mobile-social-btn">
+                        <svg class="x-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> X
+                    </a>
+                    <a href="https://t.me/suolalacto" target="_blank" class="mobile-social-btn">
+                        <i class="fab fa-telegram"></i> Telegram
+                    </a>
+                    <a href="https://trends.fun/token/CY1P83KnKwFYostvjQcoR2HJLyEJWRBRaVQmYyyD3cR8" target="_blank" class="mobile-social-btn">
+                        <i class="fas fa-fire"></i> trends.fun
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <div class="badge">
+                    <i class="fas fa-bolt"></i>
+                    <span data-i18n="hero.solana">SOLANA</span>
+                </div>
+                <h1 class="hero-title">SUOLALA$索拉拉</h1>
+                <h1 class="hero-title build-rise" data-i18n="hero.title2">We Build, We Rise</h1>
+                <p class="hero-subtitle" data-i18n="hero.subtitle">The premier Chinese ticker on Solana, inspired by Lily Liu's tweet and born as an original IP that captures the resilient spirit of Solana builders.</p>
+                <div class="hero-buttons">
+                    <a href="https://jup.ag/swap/SOL-CY1P83KnKwFYostvjQcoR2HJLyEJWRBRaVQmYyyD3cR8" target="_blank" class="btn btn-primary">
+                        <i class="fas fa-coins"></i> <span data-i18n="hero.buy">Buy $SUOLALA</span>
+                    </a>
+                    <a href="https://dexscreener.com/solana/79Qaq5b1JfC8bFuXkAvXTR67fRPmMjMVNkEA3bb8bLzi" target="_blank" class="btn btn-secondary">
+                        <i class="fas fa-chart-line"></i> <span data-i18n="hero.chart">View Chart</span>
+                    </a>
+                </div>
+            </div>
+            <div class="hero-girl">
+                <img src="suolaladance.gif" alt="SUOLALA Character Dancing" class="suolala-gif">
+            </div>
+        </div>
+    </section>
+
+    <!-- Token Section -->
+    <section class="token-section" id="token">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title" data-i18n="token.title">$SUOLALA Token</h2>
+                <p class="section-subtitle" data-i18n="token.subtitle">The future of meme utility on Solana</p>
+            </div>
+            
+            <!-- Contract Address -->
+            <div class="contract-address-box">
+                <div class="contract-label">
+                    <i class="fas fa-file-contract"></i>
+                    <span data-i18n="token.contract">Contract Address (Solana)</span>
+                </div>
+                <div class="contract-value">
+                    <code id="contractAddress">CY1P83KnKwFYostvjQcoR2HJLyEJWRBRaVQmYyyD3cR8</code>
+                    <button class="copy-btn" onclick="copyContract()">
+                        <i class="fas fa-copy"></i>
+                        <span class="copy-text" data-i18n="token.copy">Copy</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="token-stats">
+                <div class="token-stat-card">
+                    <div class="stat-header">
+                        <h3 data-i18n="token.livePrice">Live Price</h3>
+                        <div id="priceChangeContainer" class="price-change">
+                            <i id="priceChangeIcon" class="fas"></i>
+                            <span id="priceChange">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="stat-value" id="livePrice">Loading...</div>
+                    <div class="stat-subtext" data-i18n="token.perToken">Per $SUOLALA</div>
+                </div>
+                
+                <div class="token-stat-card">
+                    <div class="stat-header">
+                        <h3 data-i18n="token.marketCap">Market Cap</h3>
+                    </div>
+                    <div class="stat-value" id="marketCap">Loading...</div>
+                    <div class="stat-subtext" data-i18n="token.fdv">Fully Diluted</div>
+                </div>
+                
+                <div class="token-stat-card">
+                    <div class="stat-header">
+                        <h3 data-i18n="token.liquidity">Liquidity</h3>
+                    </div>
+                    <div class="stat-value" id="liquidity">Loading...</div>
+                    <div class="stat-subtext" data-i18n="token.totalUSD">Total USD</div>
+                </div>
+                
+                <div class="token-stat-card">
+                    <div class="stat-header">
+                        <h3 data-i18n="token.volume24h">24h Volume</h3>
+                    </div>
+                    <div class="stat-value" id="volume24h">Loading...</div>
+                    <div class="stat-subtext" data-i18n="token.tradingVolume">Trading Volume</div>
+                </div>
+                
+                <div class="token-stat-card">
+                    <div class="stat-header">
+                        <h3 data-i18n="token.transactions24h">24h Transactions</h3>
+                    </div>
+                    <div class="stat-value" id="txns24h">Loading...</div>
+                    <div class="stat-subtext" data-i18n="token.buysSells">Buys + Sells</div>
+                </div>
+                
+                <div class="token-stat-card">
+                    <div class="stat-header">
+                        <h3 data-i18n="token.holders">Holders</h3>
+                    </div>
+                    <div class="stat-value" id="holders">--</div>
+                    <div class="stat-subtext" data-i18n="token.uniqueWallets">Unique Wallets</div>
+                </div>
+            </div>
+            
+            <div class="chart-container" style="height: 750px; padding: 0; overflow: hidden;">
+                <iframe 
+                    src="https://dexscreener.com/solana/79Qaq5b1JfC8bFuXkAvXTR67fRPmMjMVNkEA3bb8bLzi?embed=1&theme=dark&trades=0&info=0" 
+                    style="width: 100%; height: 100%; border: none; border-radius: 20px;">
+                </iframe>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title" data-i18n="features.title">Why $SUOLALA?</h2>
+                <p class="section-subtitle" data-i18n="features.subtitle">Built different on Solana</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3 class="feature-title" data-i18n="features.fast.title">Fast Solana Transactions</h3>
+                    <p class="feature-text" data-i18n="features.fast.desc">Lightning-fast transactions with near-zero fees on the Solana blockchain.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="feature-title" data-i18n="features.community.title">Community Powered</h3>
+                    <p class="feature-text" data-i18n="features.community.desc">100% community-driven with transparent development and decision making.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="feature-title" data-i18n="features.secure.title">Transparent & Secure</h3>
+                    <p class="feature-text" data-i18n="features.secure.desc">Fully audited smart contracts with locked liquidity for maximum security.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h3 class="feature-title" data-i18n="features.utility.title">Meme + Utility Vision</h3>
+                    <p class="feature-text" data-i18n="features.utility.desc">Combining meme culture with real utility for sustainable growth.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Music Player -->
+    <div class="music-player">
+        <audio id="suolalaAudio" loop>
+            <source src="suolalasong.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
+        <button class="music-toggle" id="musicToggle">
+            <i class="fas fa-play" id="musicIcon"></i>
+        </button>
+        <div class="music-info">
+            <span class="song-title" data-i18n="music.title">SUOLALA Theme</span>
+            <div class="volume-control">
+                <i class="fas fa-volume-up"></i>
+                <input type="range" min="0" max="100" value="70" class="volume-slider" id="volumeSlider">
+            </div>
+        </div>
+        <div class="music-progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </div>
+
+    <!-- NFTs Section -->
+    <section class="nfts-section" id="nfts">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title" data-i18n="nfts.title">SUOLALA NFTs</h2>
+                <p class="section-subtitle" data-i18n="nfts.subtitle">Exclusive digital collectibles</p>
+            </div>
+            
+            <div class="nfts-grid">
+                <div class="nft-card">
+                    <div class="nft-image-container">
+                        <img src="nft1.jpeg" alt="Suolala #174" class="nft-image">
+                    </div>
+                    <div class="nft-info">
+                        <h3 class="nft-name">Suolala #174</h3>
+                        <a href="https://magiceden.io/item-details/34yrodb6gSi534wCLf78CFXtYaV55PPaHZiXf4yZgvBQ" target="_blank" class="btn btn-nft">
+                            <i class="fas fa-shopping-cart"></i> <span data-i18n="nfts.buy">Buy NFT</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="nft-card">
+                    <div class="nft-image-container">
+                        <img src="nft2.jpeg" alt="Suolala #3111" class="nft-image">
+                    </div>
+                    <div class="nft-info">
+                        <h3 class="nft-name">Suolala #3111</h3>
+                        <a href="https://magiceden.io/item-details/31V5a6sjwWiUu7ygk8mwvvYMwCBxRSCMpeTR2CcWhjMd" target="_blank" class="btn btn-nft">
+                            <i class="fas fa-shopping-cart"></i> <span data-i18n="nfts.buy">Buy NFT</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="nft-card">
+                    <div class="nft-image-container">
+                        <img src="nft3.jpeg" alt="Suolala #3317" class="nft-image">
+                    </div>
+                    <div class="nft-info">
+                        <h3 class="nft-name">Suolala #3317</h3>
+                        <a href="https://magiceden.io/item-details/4NCY27WPYe7LFY4mvcL6QfKqXjqQHmNa1i1Da5eati4o" target="_blank" class="btn btn-nft">
+                            <i class="fas fa-shopping-cart"></i> <span data-i18n="nfts.buy">Buy NFT</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="nft-card see-more">
+                    <div class="nft-image-container">
+                        <img src="nft4.jpg" alt="See More NFTs" class="nft-image">
+                    </div>
+                    <div class="nft-info">
+                        <h3 class="nft-name" data-i18n="nfts.fullCollection">Full Collection</h3>
+                        <p class="nft-desc" data-i18n="nfts.discover">Discover all exclusive NFTs</p>
+                        <a href="https://magiceden.io/marketplace/suolala_" target="_blank" class="btn btn-nft">
+                            <i class="fas fa-arrow-right"></i> <span data-i18n="nfts.seeMore">See More</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Roadmap Section -->
+    <section class="roadmap-section" id="roadmap">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title" data-i18n="roadmap.title">Roadmap</h2>
+                <p class="section-subtitle" data-i18n="roadmap.subtitle">Journey to the moon</p>
+            </div>
+            
+            <div class="roadmap-timeline">
+                <div class="roadmap-phase phase-completed">
+                    <div class="phase-marker">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="phase-content">
+                        <h3 class="phase-title" data-i18n="roadmap.phase1.title">Phase 1 - Completed</h3>
+                        <ul class="phase-list">
+                            <li data-i18n="roadmap.phase1.item1">Token launch & liquidity pool</li>
+                            <li data-i18n="roadmap.phase1.item2">Community building</li>
+                            <li data-i18n="roadmap.phase1.item3">First 1,000 holders</li>
+                            <li data-i18n="roadmap.phase1.item4">Website & socials launch</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="roadmap-phase phase-current">
+                    <div class="phase-marker">
+                        <i class="fas fa-play-circle"></i>
+                    </div>
+                    <div class="phase-content">
+                        <h3 class="phase-title" data-i18n="roadmap.phase2.title">Phase 2 - Current</h3>
+                        <ul class="phase-list">
+                            <li data-i18n="roadmap.phase2.item1">CEX listings</li>
+                            <li data-i18n="roadmap.phase2.item2">NFT collection launch</li>
+                            <li data-i18n="roadmap.phase2.item3">Marketing campaigns</li>
+                            <li data-i18n="roadmap.phase2.item4">Partnership announcements</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="roadmap-phase phase-upcoming">
+                    <div class="phase-marker">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <div class="phase-content">
+                        <h3 class="phase-title" data-i18n="roadmap.phase3.title">Phase 3 - Upcoming</h3>
+                        <ul class="phase-list">
+                            <li data-i18n="roadmap.phase3.item1">Utility platform development</li>
+                            <li data-i18n="roadmap.phase3.item2">Major exchange listing</li>
+                            <li data-i18n="roadmap.phase3.item3">Ecosystem expansion</li>
+                            <li data-i18n="roadmap.phase3.item4">Global meme takeover</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community Section -->
+    <section class="community-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title" data-i18n="community.title">Join Our Community</h2>
+                <p class="section-subtitle" data-i18n="community.subtitle">Be part of the SUOLALA revolution</p>
+            </div>
+            <div class="community-buttons">
+                <a href="https://x.com/suolalax" target="_blank" class="community-btn twitter-btn">
+                    <svg class="x-icon" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    <span data-i18n="community.x">X (Twitter)</span>
+                </a>
+                <a href="https://t.me/suolalacto" target="_blank" class="community-btn telegram-btn">
+                    <i class="fab fa-telegram"></i>
+                    <span data-i18n="community.telegram">Telegram</span>
+                </a>
+                <a href="https://trends.fun/token/CY1P83KnKwFYostvjQcoR2HJLyEJWRBRaVQmYyyD3cR8" target="_blank" class="community-btn trends-btn">
+                    <i class="fas fa-fire"></i>
+                    <span data-i18n="community.trends">trends.fun</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <div class="solana-logo small">
+                        <div class="solana-inner"></div>
+                        <div class="solana-inner"></div>
+                        <div class="solana-inner"></div>
+                    </div>
+                    <span class="logo-text">SUOLALA</span>
+                </div>
+                
+                <div class="footer-links">
+                    <a href="https://x.com/suolalax" target="_blank" class="footer-social">
+                        <svg class="x-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    </a>
+                    <a href="https://t.me/suolalacto" target="_blank" class="footer-social">
+                        <i class="fab fa-telegram"></i>
+                    </a>
+                    <a href="https://trends.fun/token/CY1P83KnKwFYostvjQcoR2HJLyEJWRBRaVQmYyyD3cR8" target="_blank" class="footer-social">
+                        <i class="fas fa-fire"></i>
+                    </a>
+                    <a href="https://v1.sns.id/sub-registrar/%E7%B4%A2%E6%8B%89%E6%8B%89" class="footer-social sns-btn" target="_blank" rel="noopener" aria-label="SNS">
+                        <img src="./sns.png" alt="SNS" class="footer-social-icon" style="width: 24px; height: 24px; display: block;" />
+                    </a>
+                </div>
+                
+                <div class="footer-disclaimer">
+                    <p data-i18n="footer.disclaimer1">© 2026 SUOLALA. All rights reserved. This is a meme token with no intrinsic value or expectation of financial return. Cryptocurrency investments are highly volatile and risky. Only invest what you can afford to lose.</p>
+                    <p data-i18n="footer.disclaimer2">Built on Solana</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
